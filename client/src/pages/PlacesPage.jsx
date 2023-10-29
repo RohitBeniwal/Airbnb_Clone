@@ -42,6 +42,23 @@ export default function PlacesPage() {
     setPhotolink('');
   }
 
+  function uploadPhoto(ev){
+    const files=ev.target.files;
+    const data = new FormData();
+    for(let i=0;i<files.length;i++){
+
+      data.append('photos',files[i]);
+    }
+    axios.post('/uploads',data,{
+      headers: {'Content-Type':'multipart/form-data'}
+    }).then(response=>{
+      const {data:filename}=response;
+      setPhotos(prev=>{
+        return [...prev,filename];
+      });
+    })
+  }
+
   return (
     <div>
       {action !== "new" && (
@@ -97,11 +114,15 @@ export default function PlacesPage() {
                 Add&nbsp;photo
               </button>
             </div>
-            <div className="mt-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {photos.length>0 && photos.map(link=>(
-                <div>{link}</div>
+            
+            <div className="mt-2 gap-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              {photos.length>0 && photos.map((link,index)=>(
+                <div key={index}>
+                  <img className="rounded-2xl" src={'http://localhost:4000/uploads/'+link} alt="" />
+                </div>
               ))}
-              <button className="flex justify-center gap-1 border bg-transparent rounded-2xl p-8 text-2xl text-gray-600 ">
+              <label className="flex cursor-pointer items-center justify-center gap-1 border bg-transparent rounded-2xl p-2 text-2xl text-gray-600 ">
+              <input type="file" multiple className="hidden" onChange={uploadPhoto} />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -117,7 +138,7 @@ export default function PlacesPage() {
                   />
                 </svg>
                 Upload
-              </button>
+              </label>
             </div>
             {preInput("Description", "description of the place")}
             <textarea
